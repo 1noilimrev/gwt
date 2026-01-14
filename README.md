@@ -12,6 +12,7 @@ curl -fsSL https://raw.githubusercontent.com/1noilimrev/gwt/main/install.sh | sh
 
 ```bash
 gwt add <branch>        # Create worktree (auto-links .env, node_modules, .venv)
+gwt ls                  # List all worktrees
 gwt cd <branch>         # Navigate to worktree
 gwt rm <branch>         # Remove worktree
 gwt rm -s               # Remove current worktree (returns to git root)
@@ -29,6 +30,13 @@ gwt opencode <branch>   # Run opencode in worktree
 - Auto-links `.env`, `node_modules`, `.venv`, `.claude` from main repo
 - Use `-- args` to pass extra arguments to AI tools
 - Set `GWT_CLAUDE_ARGS` or `GWT_OPENCODE_ARGS` for default arguments
+
+## Testing
+
+```bash
+./test_gwt.zsh      # Run all tests
+./test_gwt.zsh -v   # Run with verbose output
+```
 
 ## License
 

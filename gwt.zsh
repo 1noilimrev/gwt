@@ -12,6 +12,7 @@
 #       gwt rm -a -f(--force)   Remove all worktrees (no prompt, ignore uncommitted)
 #       gwt rm -m(--merge)      Merge branch before removing
 #   gwt cd <branch>             Jump into worktree directory
+#   gwt ls                      List all worktrees
 #   gwt path <branch>           Get worktree path (stdout only)
 #   gwt claude <branch> [-- args]   Run claude in worktree
 #   gwt opencode <branch> [-- args] Run opencode in worktree
@@ -473,6 +474,11 @@ gwt() {
         fi
     }
 
+    _ls() {
+        __require_git_repo || return 1
+        git worktree list "$@"
+    }
+
     # Generic AI tool runner
     # Usage: _run_ai_tool <tool_name> <branch_name> [-- extra_args...]
     _run_ai_tool() {
@@ -612,6 +618,7 @@ COMMANDS:
         -f, --force             Skip uncommitted check (+ skip confirmation for -a)
         -m, --merge [target]    Merge branch before removing (default: main)
     cd <branch>                 Change to worktree directory
+    ls                          List all worktrees
     path <branch>               Get worktree path (stdout only)
     claude <branch> [-- args]   Run claude in worktree
     opencode <branch> [-- args] Run opencode in worktree
@@ -654,6 +661,9 @@ EOF
             ;;
         path)
             _path "$@"
+            ;;
+        ls)
+            _ls "$@"
             ;;
         merge)
             _merge "$@"
