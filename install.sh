@@ -4,9 +4,10 @@
 set -e
 
 REPO_URL="https://raw.githubusercontent.com/1noilimrev/gwt/main"
-INSTALL_PATH="$HOME/.gwt.zsh"
+INSTALL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/gwt"
+INSTALL_PATH="$INSTALL_DIR/gwt.zsh"
 ZSHRC="$HOME/.zshrc"
-SOURCE_LINE='[[ -f ~/.gwt.zsh ]] && source ~/.gwt.zsh'
+SOURCE_LINE='[[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/gwt/gwt.zsh" ]] && source "${XDG_DATA_HOME:-$HOME/.local/share}/gwt/gwt.zsh"'
 
 # Colors (if terminal supports)
 if [ -t 1 ]; then
@@ -51,6 +52,14 @@ fi
 
 echo "Installing gwt..."
 
+# Create install directory if needed
+if [ ! -d "$INSTALL_DIR" ]; then
+    if ! mkdir -p "$INSTALL_DIR"; then
+        error "Failed to create $INSTALL_DIR"
+    fi
+    info "Created $INSTALL_DIR"
+fi
+
 # Backup existing file if present
 if [ -f "$INSTALL_PATH" ]; then
     BACKUP_PATH="${INSTALL_PATH}.bak.$(date +%Y%m%d%H%M%S)"
@@ -88,3 +97,5 @@ echo "To start using gwt, run:"
 echo "  ${YELLOW}source ~/.zshrc${NC}"
 echo ""
 echo "Or open a new terminal."
+echo ""
+echo "Installed to: ${YELLOW}$INSTALL_PATH${NC}"
