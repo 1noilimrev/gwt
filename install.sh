@@ -60,13 +60,6 @@ if [ ! -d "$INSTALL_DIR" ]; then
     info "Created $INSTALL_DIR"
 fi
 
-# Backup existing file if present
-if [ -f "$INSTALL_PATH" ]; then
-    BACKUP_PATH="${INSTALL_PATH}.bak.$(date +%Y%m%d%H%M%S)"
-    cp "$INSTALL_PATH" "$BACKUP_PATH"
-    info "Backed up existing file to $BACKUP_PATH"
-fi
-
 # Download gwt.zsh
 if ! curl -fsSL "$REPO_URL/gwt.zsh" -o "$INSTALL_PATH"; then
     error "Failed to download gwt.zsh"
