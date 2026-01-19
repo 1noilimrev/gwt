@@ -603,6 +603,86 @@ gwt() {
         echo "gwt $GWT_VERSION"
     }
 
+    _update() {
+        local REPO_URL="https://raw.githubusercontent.com/1noilimrev/gwt/main"
+        local INSTALL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/gwt"
+        local INSTALL_PATH="$INSTALL_DIR/gwt.zsh"
+
+        echo "checking for updates..."
+
+        # Check for curl
+        if ! command -v curl >/dev/null 2>&1; then
+            echo "error: curl is required but not installed" >&2
+            return 1
+        fi
+
+        # Fetch latest version from remote
+        local remote_script
+        remote_script=$(curl -fsSL "$REPO_URL/gwt.zsh" 2>/dev/null)
+        if [[ -z "$remote_script" ]]; then
+            echo "error: failed to fetch latest version" >&2
+            return 1
+        fi
+
+        local remote_version
+        remote_version=$(echo "$remote_script" | grep -m1 'GWT_VERSION=' | cut -d'"' -f2)
+        if [[ -z "$remote_version" ]]; then
+            echo "error: could not parse remote version" >&2
+            return 1
+        fi
+
+        echo "current version: $GWT_VERSION"
+        echo "latest version:  $remote_version"
+
+        # Compare versions (simple string comparison works for semver)
+        if [[ "$GWT_VERSION" == "$remote_version" ]]; then
+            echo "✓ already up to date"
+            return 0
+        fi
+
+        # Compare versions numerically
+        local current_parts=(${(s/./)GWT_VERSION})
+        local remote_parts=(${(s/./)remote_version})
+
+        local needs_update=false
+        for i in 1 2 3; do
+            local cur=${current_parts[$i]:-0}
+            local rem=${remote_parts[$i]:-0}
+            if (( rem > cur )); then
+                needs_update=true
+                break
+            elif (( rem < cur )); then
+                break
+            fi
+        done
+
+        if ! $needs_update; then
+            echo "✓ already up to date (current version is newer or equal)"
+            return 0
+        fi
+
+        echo "updating gwt $GWT_VERSION → $remote_version..."
+
+        # Check if install path exists
+        if [[ ! -f "$INSTALL_PATH" ]]; then
+            echo "error: gwt not installed at $INSTALL_PATH" >&2
+            echo "  → run the installer first" >&2
+            return 1
+        fi
+
+        # Write new version
+        if ! echo "$remote_script" > "$INSTALL_PATH"; then
+            echo "error: failed to write update" >&2
+            return 1
+        fi
+
+        echo "✓ updated to gwt $remote_version"
+        echo ""
+        echo "to use the new version, run:"
+        echo "  source ~/.zshrc"
+        return 0
+    }
+
     _help() {
         cat >&2 <<EOF
 gwt $GWT_VERSION - Git worktree wrapper with auto-setup
@@ -623,6 +703,7 @@ COMMANDS:
     claude <branch> [-- args]   Run claude in worktree
     opencode <branch> [-- args] Run opencode in worktree
     merge <src> [target]        Merge src into target (default: main)
+    update                      Check for updates and self-update
 
 OPTIONS:
     -v, --version               Show version
@@ -670,6 +751,9 @@ EOF
             ;;
         -v|--version)
             _version
+            ;;
+        update)
+            _update
             ;;
         -h|--help|help)
             _help
